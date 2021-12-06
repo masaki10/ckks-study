@@ -1,6 +1,21 @@
 import numpy as np
 from numpy.polynomial import Polynomial
 
+def round_coordinates(coordinates):
+    """Gives the integral rest."""
+    coordinates = coordinates - np.floor(coordinates)
+    return coordinates
+
+def coordinate_wise_random_rounding(coordinates):
+    """Rounds coordinates randonmly."""
+    r = round_coordinates(coordinates)
+    f = np.array([np.random.choice([c, c-1], 1, p=[1-c, c]) for c in r]).reshape(-1)
+    
+    rounded_coordinates = coordinates - f
+    rounded_coordinates = [int(coeff) for coeff in rounded_coordinates]
+    return rounded_coordinates
+
+
 class CKKSEncoder:
     
     def __init__(self, M: int, scale: float):
@@ -36,20 +51,6 @@ class CKKSEncoder:
         """Computes the coordinates of a vector with respect to the orthogonal lattice basis."""
         output = np.array([np.real(np.vdot(z, b) / np.vdot(b,b)) for b in self.sigma_R_basis])
         return output
-
-    def round_coordinates(coordinates):
-        """Gives the integral rest."""
-        coordinates = coordinates - np.floor(coordinates)
-        return coordinates
-
-    def coordinate_wise_random_rounding(coordinates):
-        """Rounds coordinates randonmly."""
-        r = round_coordinates(coordinates)
-        f = np.array([np.random.choice([c, c-1], 1, p=[1-c, c]) for c in r]).reshape(-1)
-        
-        rounded_coordinates = coordinates - f
-        rounded_coordinates = [int(coeff) for coeff in rounded_coordinates]
-        return rounded_coordinates
 
     def sigma_R_discretization(self, z):
       """Projects a vector on the lattice using coordinate wise random rounding."""
