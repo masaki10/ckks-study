@@ -18,20 +18,20 @@ def coordinate_wise_random_rounding(coordinates):
 
 class CKKSEncoder:
     
-    def __init__(self, M: int, scale: float):
-        """Initialization of the encoder for M a power of 2. 
+    def __init__(self, poly_degree: int, scale: float):
+        """Initialization of the encoder for poly_degree a power of 2. 
         
-        xi, which is an M-th root of unity will, be used as a basis for our computations.
+        xi, which is an poly_degree-th root of unity will, be used as a basis for our computations.
         """
-        self.xi = np.exp(2 * np.pi * 1j / M)
-        self.M = M
+        self.xi = np.exp(2 * np.pi * 1j / poly_degree)
+        self.poly_degree = poly_degree
         self.create_sigma_R_basis()
         self.scale = scale
 
     def pi(self, z: np.array) -> np.array:
       """Projects a vector of H into C^{N/2}."""
       
-      N = self.M // 4
+      N = self.poly_degree // 4
       return z[:N]
 
     def pi_inverse(self, z: np.array) -> np.array:
@@ -45,7 +45,7 @@ class CKKSEncoder:
     def create_sigma_R_basis(self):
       """Creates the basis (sigma(1), sigma(X), ..., sigma(X** N-1))."""
 
-      self.sigma_R_basis = np.array(self.vandermonde(self.xi, self.M)).T
+      self.sigma_R_basis = np.array(self.vandermonde(self.xi, self.poly_degree)).T
 
     def compute_basis_coordinates(self, z):
         """Computes the coordinates of a vector with respect to the orthogonal lattice basis."""
@@ -105,7 +105,7 @@ class CKKSEncoder:
         """Encodes the vector b in a polynomial using an M-th root of unity."""
 
         # First we create the Vandermonde matrix
-        A = CKKSEncoder.vandermonde(self.xi, self.M)
+        A = CKKSEncoder.vandermonde(self.xi, self.poly_degree)
 
         # Then we solve the system (連立方程式)
         coeffs = np.linalg.solve(A, b)
@@ -119,7 +119,7 @@ class CKKSEncoder:
         """Decodes a polynomial by applying it to the M-th roots of unity."""
 
         outputs = []
-        N = self.M //2
+        N = self.poly_degree //2
 
         # We simply apply the polynomial on the roots
         for i in range(N):
