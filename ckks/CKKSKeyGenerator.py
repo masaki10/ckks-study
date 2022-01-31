@@ -1,41 +1,14 @@
 import random
 import numpy as np
 from numpy.polynomial import Polynomial
-
-def sample_hamming_weight_vector(num_samples):
-  sample = np.zeros(num_samples)
-  total_weight = 0
-
-  while total_weight < num_samples:
-    index = random.randrange(0, num_samples)
-    if sample[index] == 0:
-      r = random.randrange(0, 2)
-      if r == 0: sample[index] = -1
-      else: sample[index] = 1
-      total_weight += 1
-
-  return sample
-
-def sample_from_uniform_distribution(min_val, max_val, num_samples):
-  assert(num_samples > 0 & isinstance(num_samples, int))
-
-  return np.array([random.randrange(min_val, max_val) for _ in range(num_samples)])
-
-def sample_from_triangle(num_samples):
-  sample = np.zeros(num_samples)
-
-  for i in range(num_samples):
-    r = random.randrange(0, 4)
-    if r == 0: sample[i] = -1
-    elif r == 1: sample[i] = 1
-
-  return sample
-
+from utils import *
+from PublicKey import PublicKey
 
 class CKKSKeyGenerator:
-  def __init__(self, poly_degree, big_modulus):
+  def __init__(self, poly_degree, big_modulus, cipher_modulus):
     self.poly_degree = poly_degree
     self.big_modulus = big_modulus
+    self.cipher_modulus = cipher_modulus
     self.generate_secret_key()
     self.generate_public_key()
 
@@ -52,7 +25,7 @@ class CKKSKeyGenerator:
     p0 = pk_coeff * self.secret_key % poly_modulus
     p0 %= self.big_modulus
     p0 *= -1
-    p0 += pk_err
+    p0 += pk_err * self.cipher_modulus # ここ微妙
     p0 %= self.big_modulus
     p1 = pk_coeff
-    self.public_key = [p0, p1]
+    self.public_key = PublicKey(p0, p1)
